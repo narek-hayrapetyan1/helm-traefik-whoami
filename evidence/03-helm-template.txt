@@ -1,0 +1,129 @@
+|19:05:50|:~/Downloads/helm-traefik-whoami/> helm template my-webapp ./my-webapp
+---
+# Source: my-webapp/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: my-webapp
+  labels:
+    helm.sh/chart: my-webapp-0.1.0
+    app.kubernetes.io/name: my-webapp
+    app.kubernetes.io/instance: my-webapp
+    app.kubernetes.io/managed-by: Helm
+automountServiceAccountToken: true
+
+---
+# Source: my-webapp/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-webapp
+  labels:
+    helm.sh/chart: my-webapp-0.1.0
+    app.kubernetes.io/name: my-webapp
+    app.kubernetes.io/instance: my-webapp
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: my-webapp
+    app.kubernetes.io/instance: my-webapp
+
+---
+# Source: my-webapp/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-webapp
+  labels:
+    helm.sh/chart: my-webapp-0.1.0
+    app.kubernetes.io/name: my-webapp
+    app.kubernetes.io/instance: my-webapp
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: my-webapp
+      app.kubernetes.io/instance: my-webapp
+  template:
+    metadata:
+      labels:
+        helm.sh/chart: my-webapp-0.1.0
+        app.kubernetes.io/name: my-webapp
+        app.kubernetes.io/instance: my-webapp
+        app.kubernetes.io/managed-by: Helm
+    spec:
+      serviceAccountName: my-webapp
+      securityContext:
+        {}
+      containers:
+        - name: my-webapp
+          securityContext:
+            {}
+          image: "traefik/whoami:latest"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {}
+
+---
+# Source: my-webapp/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-webapp
+  labels:
+    helm.sh/chart: my-webapp-0.1.0
+    app.kubernetes.io/name: my-webapp
+    app.kubernetes.io/instance: my-webapp
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+    traefik.ingress.kubernetes.io/router.middlewares: default-my-webapp-strip-whoami@kubernetescrd
+spec:
+  ingressClassName: traefik
+  rules:
+    -
+      http:
+        paths:
+          - path: /whoami
+            pathType: Prefix
+            backend:
+              service:
+                name: my-webapp
+                port:
+                  number: 80
+
+---
+# Source: my-webapp/templates/middleware.yaml
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: my-webapp-strip-whoami
+  labels:
+    helm.sh/chart: my-webapp-0.1.0
+    app.kubernetes.io/name: my-webapp
+    app.kubernetes.io/instance: my-webapp
+    app.kubernetes.io/managed-by: Helm
+spec:
+  stripPrefix:
+    prefixes:
+      - /whoami
+|19:07:03|:~/Downloads/helm-traefik-whoami/> 

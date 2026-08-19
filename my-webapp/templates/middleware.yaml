@@ -1,0 +1,12 @@
+{{- if .Values.middleware.enabled }}
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ .Values.middleware.name }}
+  labels:
+    {{- include "my-webapp.labels" . | nindent 4 }}
+spec:
+  stripPrefix:
+    prefixes:
+      {{- toYaml .Values.middleware.stripPrefix.prefixes | nindent 6 }}
+{{- end }}

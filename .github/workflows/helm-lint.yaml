@@ -1,0 +1,12 @@
+name: Helm Lint
+on:
+  push:
+  pull_request:
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+      - run: helm lint ./my-webapp
+      - run: helm template my-webapp ./my-webapp > /tmp/rendered.yaml

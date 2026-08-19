@@ -1,0 +1,23 @@
+|19:08:56|:~/Downloads/helm-traefik-whoami/> kubectl get middleware.traefik.io my-webapp-strip-whoami -o yaml
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  annotations:
+    meta.helm.sh/release-name: my-webapp
+    meta.helm.sh/release-namespace: default
+  creationTimestamp: "2026-08-19T14:08:54Z"
+  generation: 1
+  labels:
+    app.kubernetes.io/instance: my-webapp
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: my-webapp
+    helm.sh/chart: my-webapp-0.1.0
+  name: my-webapp-strip-whoami
+  namespace: default
+  resourceVersion: "949"
+  uid: e390d4b7-3f08-478c-a2f5-2f51e68a3804
+spec:
+  stripPrefix:
+    prefixes:
+    - /whoami
+|19:09:35|:~/Downloads/helm-traefik-whoami/> 
